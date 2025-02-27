@@ -193,15 +193,27 @@ Kirby::plugin('hananils/date-methods', [
     'pageMethods' => [
         'toDateRange' => function (
             $fieldStart = ['start', 'starttime'],
-            $fieldEnd = ['end', 'endtime']
+            $fieldEnd = ['end', 'endtime'],
         ) {
+            if (kirby()->language()) {
+                $locale = kirby()
+                    ->language()
+                    ->locale();
+            } else {
+                $locale = option('locale');
+            }
+
+            if (is_array($locale)) {
+                $values = array_values($locale);
+                $locale = array_shift($values);
+            }
             if (is_array($fieldStart)) {
                 $start = $this->content()
                     ->get($fieldStart[0])
                     ->toDate('Y-m-d');
                 $starttime = $this->content()
                     ->get($fieldStart[1])
-                    ->toDate('H:i');
+                    ->toDate('H:mm');
             } else {
                 $start = $this->content()
                     ->get($fieldStart)
@@ -215,7 +227,7 @@ Kirby::plugin('hananils/date-methods', [
                     ->toDate('Y-m-d');
                 $endtime = $this->content()
                     ->get($fieldEnd[1])
-                    ->toDate('H:i');
+                    ->toDate('H:mm');
             } else {
                 $end = $this->content()
                     ->get($fieldEnd)
@@ -227,7 +239,7 @@ Kirby::plugin('hananils/date-methods', [
                 $end = $start;
             }
 
-            return dateRange([$start, $starttime], [$end, $endtime]);
+            return dateRange([$start, $starttime], [$end, $endtime], $locale);
         },
         'toDatePeriod' => function (
             $fieldStart = 'start',
@@ -384,10 +396,10 @@ function dateRounded($datetime, $interval = 'PT5M', $reference = null)
     return $result->setTimestamp($normalized);
 }
 
-function dateRange($from = [null, null], $to = [null, null])
+function dateRange($from = [null, null], $to = [null, null], $code = 'de')
 {
     $options = option('hananils.date-methods', [
-        'code' => 'de',
+        'code' => $code,
         'rangeseparator' => '–',
         'datetimeseparator' => ', ',
         'datetype' => IntlDateFormatter::LONG,
