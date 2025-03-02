@@ -194,6 +194,8 @@ Kirby::plugin('hananils/date-methods', [
         'toDateRange' => function (
             $fieldStart = ['start', 'starttime'],
             $fieldEnd = ['end', 'endtime'],
+            $style = 'long',
+            $time = true
         ) {
             if (kirby()->language()) {
                 $locale = kirby()
@@ -208,30 +210,24 @@ Kirby::plugin('hananils/date-methods', [
                 $locale = array_shift($values);
             }
             if (is_array($fieldStart)) {
-                $start = $this->content()
-                    ->get($fieldStart[0])
-                    ->toDate('Y-m-d');
-                $starttime = $this->content()
-                    ->get($fieldStart[1])
+                $start = $fieldStart[0]
+                    ->toDate('y-MM-dd');
+                $starttime = $fieldStart[1]
                     ->toDate('H:mm');
             } else {
-                $start = $this->content()
-                    ->get($fieldStart)
-                    ->toDate('Y-m-d');
+                $start = $fieldStart
+                    ->toDate('y-MM-dd');
                 $starttime = null;
             }
 
             if (is_array($fieldEnd)) {
-                $end = $this->content()
-                    ->get($fieldEnd[0])
-                    ->toDate('Y-m-d');
-                $endtime = $this->content()
-                    ->get($fieldEnd[1])
+                $end = $fieldEnd[0]
+                    ->toDate('y-MM-dd');
+                $endtime = $fieldEnd[1]
                     ->toDate('H:mm');
             } else {
-                $end = $this->content()
-                    ->get($fieldEnd)
-                    ->toDate('Y-m-d');
+                $end = $fieldEnd
+                    ->toDate('y-MM-dd');
                 $endtime = null;
             }
 
@@ -239,7 +235,7 @@ Kirby::plugin('hananils/date-methods', [
                 $end = $start;
             }
 
-            return dateRange([$start, $starttime], [$end, $endtime], $locale);
+            return dateRange([$start, $starttime], [$end, $endtime], $locale, $style, $time);
         },
         'toDatePeriod' => function (
             $fieldStart = 'start',
@@ -396,14 +392,14 @@ function dateRounded($datetime, $interval = 'PT5M', $reference = null)
     return $result->setTimestamp($normalized);
 }
 
-function dateRange($from = [null, null], $to = [null, null], $code = 'de')
+function dateRange($from = [null, null], $to = [null, null], $code = 'de', $style = 'long', $time = true)
 {
     $options = option('hananils.date-methods', [
         'code' => $code,
         'rangeseparator' => '–',
         'datetimeseparator' => ', ',
-        'datetype' => IntlDateFormatter::LONG,
-        'timetype' => IntlDateFormatter::SHORT
+        'datetype' => $style === 'long' ? IntlDateFormatter::LONG : ($style === 'short' ? IntlDateFormatter::SHORT : IntlDateFormatter::MEDIUM),
+        'timetype' => $time ? IntlDateFormatter::SHORT : IntlDateFormatter::NONE
     ]);
 
     $ranger = new OpenPsa\Ranger\Ranger($options['code']);
@@ -424,7 +420,7 @@ function dateRange($from = [null, null], $to = [null, null], $code = 'de')
         $end = datetime($to[0]);
     }
 
-    if (!empty($from[1])) {
+    if (!empty($from[1]) && $time) {
         [$hours, $minutes] = explode(':', $from[1]);
         $start->setTime($hours, $minutes);
 
