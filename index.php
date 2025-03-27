@@ -435,9 +435,10 @@ function dateRange($from = [null, null], $to = [null, null], $code = 'de', $styl
         $ranger->setTimeType(IntlDateFormatter::NONE);
     }
 
-    // Ranger doesn't correctly format same start and end dates with times.
+// Ranger doesn't correctly format same start and end dates with times.
     // This needs to be handled manually.
     if ($start == $end) {
+        // Use a consistent approach with the same formatter for the date portion
         $result = dateFormatted(
             $options['code'],
             $start,
@@ -445,7 +446,8 @@ function dateRange($from = [null, null], $to = [null, null], $code = 'de', $styl
             IntlDateFormatter::NONE
         );
 
-        if (!empty($from[1])) {
+        // Only add time if it's provided and time display is enabled
+        if (!empty($from[1]) && $options['timetype'] !== IntlDateFormatter::NONE) {
             $result .= $options['datetimeseparator'];
             $result .= dateFormatted(
                 $options['code'],
