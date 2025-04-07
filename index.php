@@ -397,8 +397,8 @@ function dateRange($from = [null, null], $to = [null, null], $code = 'de', $styl
     $options = option('hananils.date-methods', [
         'code' => $code,
         'rangeseparator' => '–',
-        'datetimeseparator' => ', ',
-        'datetype' => $style === 'long' ? IntlDateFormatter::LONG : ($style === 'short' ? IntlDateFormatter::SHORT : IntlDateFormatter::MEDIUM),
+        'datetimeseparator' => $code == 'de_DE' ? ' um ' : ' at ',
+        'datetype' => $style === 'long' ? IntlDateFormatter::FULL : ($style === 'short' ? IntlDateFormatter::SHORT : IntlDateFormatter::MEDIUM),
         'timetype' => $time ? IntlDateFormatter::SHORT : IntlDateFormatter::NONE
     ]);
 
@@ -464,6 +464,12 @@ function dateRange($from = [null, null], $to = [null, null], $code = 'de', $styl
         $start->format('Y-m-d H:i'),
         $end->format('Y-m-d H:i')
     );
+
+    // Add "Uhr" to time values for German locale
+    if ($options['code'] === 'de' && $options['timetype'] !== IntlDateFormatter::NONE) {
+        // This pattern matches time values (digits:digits) not already followed by "Uhr"
+        $result = preg_replace('/(\d+:\d+)(?!\s*Uhr)/', '$1 Uhr', $result);
+    }
 
     if ($options['code'] === 'de') {
         $result = preg_replace(
