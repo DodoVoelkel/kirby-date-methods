@@ -398,7 +398,7 @@ function dateRange($from = [null, null], $to = [null, null], $code = 'de', $styl
         'code' => $code,
         'rangeseparator' => '–',
         'datetimeseparator' => $code == 'de_DE' ? ' um ' : ' at ',
-        'datetype' => $style === 'long' ? IntlDateFormatter::FULL : ($style === 'short' ? IntlDateFormatter::SHORT : IntlDateFormatter::MEDIUM),
+        'datetype' => $style === 'long' ? IntlDateFormatter::LONG : ($style === 'short' ? IntlDateFormatter::SHORT : IntlDateFormatter::MEDIUM),
         'timetype' => $time ? IntlDateFormatter::SHORT : IntlDateFormatter::NONE
     ]);
 
